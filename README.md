@@ -39,7 +39,7 @@ The Mosquitto configuration file can be edited with following command. Make sure
 ```
 sudo nano /etc/mosquitto/mosquitto.conf
 ```
-The Mosquitto configuration file used for this setup you see in the following. Short explanation: anonymous users are not allowed to connect, default internal listener at port 1883 (no TLS), external listener at port 8883 (TLS v1.2 secured) with the required crypto material, no client certificates required.
+The Mosquitto configuration file used for this setup you see in the following. Short explanation: anonymous users are not allowed to connect, default port 1883 (no TLS) for internal MQTT clients, port 8883 (TLS v1.2 secured) for external MQTT clients with the required crypto material, no client certificates required.
 ```
 pid_file /var/run/mosquitto.pid
 
@@ -78,7 +78,7 @@ sudo openssl req -new -x509 -days 15000 -key ca.key -out ca.crt
 ```
 sudo openssl genrsa -out server.key 2048
 ```
-4. Now we create a server certificate request. When filling out the form the `Common Name` is important and is usually the domain name of the server. In my case it would be `YOUR_DOMAIN.freemyip.com`. Please fill in the other fields slightly different values as in step 2.
+4. Now we create a server certificate request. When filling out the form the `Common Name` is important and is usually the domain name of the server. In my case it would be `YOUR_DOMAIN.freemyip.com`. Please fill in the other fields with slightly different values as in step 2.
 ```
 sudo openssl req -new -out server.csr -key server.key
 ```
@@ -98,7 +98,7 @@ You can see all traces of the MQTT broker in the mosquitto.log file. Best is to 
 ```
 sudo tail -f /var/log/mosquitto/mosquitto.log
 ```
-### Testing locally on the broker
+### Local testing on the broker
 The package `mosquitto-clients` is used for the following. Here is an example for publishing and subsribing to a topic.
 ```
 mosquitto_pub -t "your topic" -h localhast -u "your username" -P "your password" -m "your value" -p 1883
@@ -121,15 +121,15 @@ For installation of Node.js, npm and Node-RED on the Broker you need issue follo
 ```
 bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
 ```
-After successful installation you need to start the Node-Red by issueing following command. 
+After successful installation you need to start the Node-Red by executing following command. 
 ```
 node-red-start
 ```
-Node-RED as a service can be started like this.
+Node-RED as a service can be started with this command.
 ```
 sudo systemctl enable nodered.service
 ```
-Now you can directly access Node-RED over the IP or hostname of the Raspberry Pi and the port 1880. You can configure your flows now. Your local Node-RED server can act as any other MQTT client and communicates directly with the mosquitto broker.
+Now you can directly access Node-RED over the IP or hostname of the Raspberry Pi and the port 1880. You can configure your flows now. Your local Node-RED server can act as any other MQTT client and communicates directly with the Mosquitto broker.
 ```
 http://raspberrypi.local:1880
 ```
@@ -141,7 +141,7 @@ node-red-stop
 cd ~/.node-red
 npm install node-red-dashboard
 ```
-Then reboot your Raspberry Pi to ensure that all changes take effect on Node-RED software. To open the Node-RED UI, type your Raspberry Pi IP address in a web browser followed by :1880/ui as shown below.
+Then reboot your Raspberry Pi to ensure that all changes take effect on Node-RED software. To open the Node-RED UI, type your Raspberry Pi IP address or hostname in a web browser followed by :1880/ui as shown below.
 ```
 http://raspberrypi.local:1880/ui
 ```
