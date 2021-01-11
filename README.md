@@ -9,7 +9,7 @@ This is a instuction how to install and configure a Raspberry Pi as an MQTT brok
 * a static IP-address needs to be assigned to the Raspberry Pi instead of DHCP. This is required by the router for port forwarding and by the MQTT clients.
 
 ## Setup
-![Setup](/mqtt_setup.png)
+![MqttSetup](/mqtt_setup.png)
 
 ## Installation
 The descision was made on the broker software Mosquitto.
@@ -64,7 +64,7 @@ require_certificate false
 ```
 
 ## Creating TLS crypto material with openssl
-![TLS handshaking](/tls_handshaking.png)
+![TLShandshaking](/tls_handshaking.png)
 
 1. As we are our own CA (certificate authority) we create first our CA key pair. Make sure this CA key is stored secure that it cannot be stolen.
 ```
@@ -112,6 +112,9 @@ mosquitto_sub -t "your topic" -h 192.168.1.10 -u "your username" -P "your passwo
 mosquitto_pub -t "your topic" -h raspberrypi.local -u "your username" -P "your password" -m "your value" -p 1883
 mosquitto_sub -t "your topic" -h raspberrypi.local -u "your username" -P "your password" -p 1883
 ```
+## Android client
+I am using the IOT-MQTT-Panel-Pro app for Android OS. Make sure to copy the previously generated CA.crt file to your Android device and reference it from the app. This is required to estalish the secure TLS connection between your Android device and the broker. Now you can talk with your Android device to your IOT-device from all over the world.
+![IOTmqttPanelPro](/iot_mqtt_panel_pro.png)
 
 ## Node-RED
 Node-RED is a programming tool for wiring together hardware devices and APIs. It provides a browser-based editor that makes it easy to wire together flows using the wide range of nodes in the palette that can be deployed to its runtime in a single-click.
@@ -135,6 +138,8 @@ http://raspberrypi.local:1880
 ```
 
 ### Dashboard installation
+![NodeRED](/node_red.png)
+
 Node-RED dashboard is a module that provides a set of nodes in Node-RED to quickly create a live data dashboard. To install the Node-RED Dashboard run the following commands.
 ```
 node-red-stop
