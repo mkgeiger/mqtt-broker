@@ -150,6 +150,59 @@ Then reboot your Raspberry Pi to ensure that all changes take effect on Node-RED
 ```
 http://raspberrypi.local:1880/ui
 ```
+### Securing Node-RED and the Dashboard
+Also for Node-RED (and the Dashboard) it is possible to setup a 2-way handshake TLS-connection to secure the connection between a mobile client and the Node-RED server. Make sure to setup first port-forwarding for port 1880 in your router. The key and the certificates generated for the mosquitto server can be reused for Node-RED again. So copy ca.crt, server.key and server.crt to `/home/pi/.node-red` directory. Find, uncomment and adapt following sections in the file `/home/pi/.node-red/settings.js`:
+1. add user (admin) + password for the Node-RED flow editor
+```
+    adminAuth: {
+        type: "credentials",
+        users: [{
+            username: "admin",
+            password: "$2b$18$SWlyou_will_not_guess_my_passwordUnoMkHu/eWAn0iaXcHjz",
+            permissions: "*"
+        }]
+    },
+```
+2. set user + password for the nodes (e.g. the dashboard node)
+```
+    httpNodeAuth: {user:"admin",pass:"$2b$18$SWlyou_will_not_guess_my_passwordUnoMkHu/eWAn0iaXcHjz"},
+```
+3. setup https protocol with key and certificates with required client certificate authentication
+```
+    https: {
+      ca: require("fs").readFileSync('/home/pi/.node-red/ca.crt'),
+      key: require("fs").readFileSync('/home/pi/.node-red/server.key'),
+      cert: require("fs").readFileSync('/home/pi/.node-red/server.crt'),
+      requestCert: true,
+      rejectUnauthorized: true,
+    },
+```
+4. redirect allways http requests to https requests
+```
+   requireHttps: true,
+```
+The hash for the admin password (step 1 +2) can be generated with the command:
+```
+node-red admin hash-pw
+```
+The Node-RED server side security setup is now completed and the RaspberryPi can be restarted. Let's go to the client installation. The client can be a smartphone with e.g. Android installed. There needs no special Node-RED client to be installed as the Node-RED server is acting as a normal webserver and the default webbrowser would be enough. We need to generate the Node-RED client key and certificate for the client authentication.
+1. Now we create a client key pair that will be used by the client.
+```
+sudo openssl genrsa -out client.key 2048
+```
+2. Now we create a client certificate request.
+```
+sudo openssl req -new -out client.csr -key client.key
+```
+3. Now we use the CA key to verify and sign the client certificate. This creates the client.crt file.
+```
+sudo openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -days 15000
+```
+4. Now create a PKCS12 container for the client key and client certificate, so that it can be imported easily into e.g. the smartphone keystore.
+```
+sudo openssl pkcs12 -export -in client.crt -inkey client.key -out client.p12
+```
+Now first transfer the files ca.crt and client.p12 to your smartphone's memory and install them (by double click) into your smartphone's keystore by giving meaningfull names. Don't forget to delete both files afterwards from the smartphone's memory. Done. You can now access from internet your Node-Red server editor by e.g. `https://YOUR_DOMAIN.freemyip.com:1880` and the dashboard by `https://YOUR_DOMAIN.freemyip.com:1880/ui`. Be aware an access from your internal network is now also only possible with https because all http requests will be redirected now to https. For the editor it is `https://YOUR_INTERNAL_IP:1880` and the dashboard `https://YOUR_INTERNAL_IP:1880/ui`.
 
 ## DynDns client (ddclient) configuration example
 ### Installation
